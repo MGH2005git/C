@@ -121,6 +121,21 @@ void input(char *line[MAX],int index){ // array of pointers
     line[i][0] = '\0';
 }
 
+void gettoken(const char *line,char *token[]){
+    int i = 0,j = 0;
+    while(*line!='\0'){
+        while(space(*line))
+            line++;
+        if(*line=='\0')
+            break;
+        while(!space(*line)&&*line!='\0')
+            *token[j]++ = *line++;
+        *token[j] = '\0';
+        j++;
+    }
+    token[j][0] = '\0';
+}
+
 void printstr(const char *s){
     for(;*s!='\0';s++)
         putchar(*s);
@@ -321,6 +336,14 @@ int checkwordCS(const char *s1,const char *s2){
         if((*s1)!=(*s2))
             return 0;
     return 1;
+}
+
+void addstring(const char *s1,const char *s2,char *result){
+    while(*s1!='\0')
+        *result++ = *s1++;
+    while(*s2!='\0')
+        *result++ = *s2++;
+    *result = '\0';
 }
 
 /*========================================================NUMERIC FUNCTIONS=======================================================*/

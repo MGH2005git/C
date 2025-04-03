@@ -81,6 +81,22 @@ void input(char line[MAX][MAX],int index){
     line[i][0] = '\0';
 }
 
+void gettoken(const char line[],char token[MAX][MAX]){
+    int i = 0,j = 0,k = 0;
+    while(line[i]!='\0'){
+        while(space(line[i]))
+            i++;
+        if(line[i]=='\0')
+            break;
+        while(!space(line[i])&&line[i]!='\0')
+            token[j][k++] = line[i++];
+        token[j][k] = '\0';
+        k = 0;
+        j++;
+    }
+    token[j][0] = '\0';
+}
+
 void printstr(const char s[]){
     int i;
     for(i=0;s[i]!='\0';i++)
@@ -287,6 +303,15 @@ int checkwordCS(const char s1[],const char s2[]){
         if((s1[i])!=(s2[i]))
             return 0;
     return 1;
+}
+
+void addstring(const char s1[],const char s2[],char result[]){
+    int i = 0;
+    for(int j = 0;s1[j]!='\0';j++)
+        result[i++] = s1[j];
+    for(int k = 0;s2[k]!='\0';k++)
+        result[i++] = s2[k];
+    result[i] = '\0';
 }
 
 /*======================================================NUMERIC FUNCTIONS======================================================*/
