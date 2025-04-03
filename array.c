@@ -16,11 +16,14 @@ int isletter(int c){
     return ((c >= 'A' && c <= 'Z')||(c >= 'a' && c <= 'z'));
 }
 
-int isnumber(char *s){
-    int i = 0;
-    for(i;s[i]!='\0';i++)
-        if(!digit(s[i]))
+int isnumber(const char *s){
+    if(*s=='\0')
+        return 0;
+    while(*s!='\0'){
+        if(!digit(*s))
             return 0;
+        s++;
+    }
     return 1;
 }
 
@@ -56,18 +59,20 @@ void printstr(const char *first,...){
     va_list args;
     char *s = first;
     va_start(args,first);
-    while(s!=NULL)
+    while(s!=NULL){
         printf("%s\n",s);
+        s = va_arg(args,const char*);
+    }
     va_end(args);
 }
 
 /*================================================================================================================================*/
 
 int gline(char *s){
-    int i,c;
-    for(i=0;i<MAX-1&&((c = getchar())!=EOF)&&c!='\n';i++)
-        s[i] = c;
-    s[i] = '\0';
+    int c,i = 0;
+    for(;((c = getchar())!='\n'&&c!=EOF);i++)
+        *s++ = c;
+    *s = '\0';
     return i;
 }
 
@@ -98,38 +103,36 @@ int getnum(void){
     return n;
 }
 
-void input(char line[MAX][MAX],int index){
+void input(char *line[MAX],int index){ // array of pointers
     int i = index;
-    int c,j = 0;
+    int c;
     while(1){
         while(space(c)&&c!='\n'&&c!=EOF)
             c = getchar();
         if(c==EOF||c=='\n')
             break;
-        while(!space(c)&&c!='\n'&&c!=EOF){
-            line[i][j++] = c;
+        while(!space(c)&&c!=EOF){
+            *line[i]++ = c;
             c = getchar();
         }
-        line[i][j] = '\0';
-        j = 0;
+        *line[i] = '\0';
         i++;
     }
     line[i][0] = '\0';
 }
 
-void printstr(const char s[]){
-    int i;
-    for(i=0;s[i]!='\0';i++)
-        putchar(s[i]);
+void printstr(const char *s){
+    for(;*s!='\0';s++)
+        putchar(*s);
 }
 
-int len(const char s[]){
+int len(const char *s){
     int i = 0;
     for(i;s[i]!='\0';i++);
     return i;
 }
 
-void reverse(char s[]){
+void reverse(char *s){
     int i,j;
     for(i=0,j=len(s)-1;i<j;i++,j--){
         char t;
@@ -139,7 +142,7 @@ void reverse(char s[]){
     }
 }
 
-void copy(const char from[],char to[],int i1,int i2){
+void copy(const char *from,char *to,int i1,int i2){
     int i,j=0;
     clearstr(to);
     for(i=i1;i<=i2;i++)
@@ -147,78 +150,76 @@ void copy(const char from[],char to[],int i1,int i2){
     to[j] = '\0';
 }
 
-int strtoint(const char s[]){
-    int i = 0,n = 0;
+int strtoint(const char *s){
+    int n = 0;
     int sign = 1;
-    while(space(s[i]))
-        i++;
-    if(s[i]=='-'||s[i] == '+'){
-        sign = (s[i] == '-') ? -1 : 1;
-        i++;
+    while(space(*s))
+        s++;
+    if(*s=='-'||*s == '+'){
+        sign = (*s == '-') ? -1 : 1;
+        s++;
     }
-    for(i=0;s[i]!='\0';i++)
-        if(digit(s[i]))
-            n = 10*n + s[i] - '0';
+    for(;*s!='\0';s++)
+        if(digit(*s))
+            n = 10*n + *s - '0';
     return sign*n;
 }
 
-double strtofloat(const char s[]){
-    int i = 0;
+double strtofloat(const char *s){
     double n = 0.0;
     int sign = 1;
-    while(isspace(s[i]))
-        i++;
-    if(s[i]=='-'||s[i] == '+'){
-        sign = (s[i] == '-') ? -1 : 1;
-        i++;
+    while(isspace(*s))
+        s++;
+    if(*s=='-'||*s == '+'){
+        sign = (*s == '-') ? -1 : 1;
+        s++;
     }
-    for(i;s[i]!='.';i++){
-        n = 10*n + s[i] - '0';
+    for(;*s!='.';s++){
+        n = 10*n + *s - '0';
     }
-    if(s[i]=='.')
-        i++;
+    if(*s=='.')
+        s++;
     double m = 1.0;
-    for(i;s[i]!='\0';i++){
+    for(;*s!='\0';s++){
         m *= 0.1;
-        n += (s[i] - '0')*m;
+        n += (*s - '0')*m;
     }
     return sign*n;
 }
 
-void inttostr(int n,char s[]){
-    int i = 0;
+void inttostr(int n,char *s){
     if(n == 0){
-        s[i++] = '0';
-        s[i] = '\0';
+        *s++ = '0';
+        *s = '\0';
         return ;
     }
     int sign = 0;
     if(n<0){
         n = -n;
-        sign = -1;
+        sign = 1;
     }
     while(n!=0){
-        s[i++] = n % 10 + '0';
+        *s++ = n%10 + '0';
         n /= 10;
     }
     if(sign)
-        s[i++] = '-';
-    s[i] = '\0';
+        *s++ = '-';
+    *s = '\0';
     reverse(s);
 }
 
-int findindex(const char line[],const char s[]){ // THIS ONE IS IMPORTANT
+int findindex(const char *line,const char *word){ // THIS ONE IS IMPORTANT
     int i,j = 0;
     int l1 = len(line);
-    int l2 = len(s);
+    int l2 = len(word);
     if(l2>l1)
         return -1;
     int flag = 0;
     for(i = 0;i<=l1-l2&&line[i]!='\0';i++){
-        if(s[j]==line[i]){
+        if(word[j]==line[i]){
             flag = 1;
-            for(j = 0;s[j]!='\0';j++){
-                if(s[j]!=line[i+j]){
+            for(j = 0;word[j]!='\0';j++){
+                if(word[j]!=line[i+j]){
                     flag = 0;
                     break;
                 }
@@ -230,18 +231,17 @@ int findindex(const char line[],const char s[]){ // THIS ONE IS IMPORTANT
     return -1;
 }
 
-int countchar(const char s[],int c){
-    int i;
+int countchar(const char *s,int c){
     int count = 0;
     char t;
     t = c;
-    for(i=0;s[i]!='\0';i++)
-        if(s[i]==t)
+    for(;*s!='\0';s++)
+        if(*s==t)
             count++;
     return count;
 }
 
-int ispalindrom(const char s[]){
+int ispalindrom(const char *s){
     int i,j;
     for(i=0,j=len(s)-1;i<j;i++,j--){
         if (s[i] != s[j])
@@ -250,7 +250,7 @@ int ispalindrom(const char s[]){
     return 1;
 }
 
-void Sortstr(char s[]){
+void Sortstr(char *s){
     int i,j;
     int l = len(s);
     for(i=0;i<l;i++){
@@ -265,7 +265,7 @@ void Sortstr(char s[]){
     }
 }
 
-void removespace(char s[]){
+void removespace(char *s){
     int i,j;
     for(i=0,j=0;s[i]!='\0';i++){
         if(s[i]!='\t'&&s[i]!=' ')
@@ -274,7 +274,7 @@ void removespace(char s[]){
     s[j] = '\0';
 }
 
-void cutstring(char s[],int i1,int i2,char t[]){
+void cutstring(char *s,int i1,int i2,char *t){
     int i=0;
     int j = 0;
     while(s[i]!='\0'){
@@ -289,7 +289,7 @@ void cutstring(char s[],int i1,int i2,char t[]){
         s[k] = t[k];
 }
 
-void cutstr(char s[],int i1,int i2,char t[]){
+void cutstr(char *s,int i1,int i2,char *t){
     int i,j=0;
     for(i=i1;i<=i2;i++)
         t[j++] = s[i];
@@ -305,22 +305,20 @@ int lower(const char c){
     return c;
 }
 
-int checkword(const char s1[],const char s2[]){
+int checkword(const char *s1,const char *s2){
     if(len(s1)!=len(s2))
         return 0;
-    int i;
-    for(i=0;s1[i]!='\0';i++)
-        if(lower(s1[i])!=lower(s2[i]))
+    for(;*s1!='\0';s1++,s2++)
+        if(lower(*s1)!=lower(*s2))
             return 0;
     return 1;
 }
 
-int checkwordCS(const char s1[],const char s2[]){
+int checkwordCS(const char *s1,const char *s2){
     if(len(s1)!=len(s2))
         return 0;
-    int i;
-    for(i=0;s1[i]!='\0';i++)
-        if((s1[i])!=(s2[i]))
+    for(;*s1!='\0';s1++,s2++)
+        if((*s1)!=(*s2))
             return 0;
     return 1;
 }
